@@ -104,14 +104,39 @@
 
 ## 訓練結果
 
-> 訓練完成後，結果圖表將更新於此處。
+> 在本機 CPU（Apple M1）訓練，54 epochs（早停），最佳模型在 epoch 29。
 
-| 指標 | 數值 |
-|------|------|
-| 測試集準確率 | — |
-| clean F1 | — |
-| turbid F1 | — |
-| dirty F1 | — |
+### 整體準確率
+
+**測試集 Accuracy：58.3%**（21/36 張）
+
+### 各類別指標
+
+| 類別 | Precision | Recall | F1-Score |
+|------|-----------|--------|----------|
+| clean（乾淨） | 66.7% | 50.0% | 57.1% |
+| dirty（髒） | 52.9% | 64.3% | 58.1% |
+| turbid（混濁） | 62.5% | 55.6% | 58.8% |
+
+### 混淆矩陣
+
+![混淆矩陣](results/confusion_matrix.png)
+
+### 各類別 F1
+
+![F1 長條圖](results/f1_scores.png)
+
+### 訓練曲線
+
+![訓練曲線](results/training_curves.png)
+
+### 結果解讀
+
+- **最常見誤判**：把「混濁」誤判為「髒」（8 次）——兩類顏色接近，視覺差異小
+- **準確率偏低的主因**：`clean` 只有 40 張，資料量嚴重不均衡
+- **改善方向**：補充 clean 照片至 100 張以上，並改用 Colab GPU 訓練
+
+> 📄 詳細分析請見 [results/analysis_report.md](results/analysis_report.md)
 
 ---
 
