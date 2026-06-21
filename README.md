@@ -1,0 +1,157 @@
+# 🌊 瓦磘溝水質影像辨識
+
+**瓦磘溝行動研究社 × YOLOv8 影像分類**
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/d225d225/Image-Cropping-for-Water-Quality-Classification/blob/main/water_quality_colab.ipynb)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
+[![YOLOv8](https://img.shields.io/badge/YOLOv8-ultralytics-orange.svg)](https://github.com/ultralytics/ultralytics)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+---
+
+## 專案介紹
+
+「**瓦磘溝行動研究社**」是由永平高中學生組成的實作研究團隊，學生親自前往瓦磘溝進行田野調查，拍攝不同水質狀況的照片，並依照水質清澈程度手動分類。
+
+本專案利用這批真實田野照片，訓練一個 AI 模型，讓電腦學會自動判斷照片中的水是乾淨、混濁還是髒的。訓練前照片已預先裁切，只保留水面部分，去除背景干擾。
+
+**目標：**
+> 讓 AI 模型看一張瓦磘溝的水面照片，就能自動判斷水質屬於哪一個等級。
+
+---
+
+## 資料集說明
+
+### 三個水質類別
+
+| 資料夾 | 類別名稱 | 說明 | 照片範例 |
+|--------|---------|------|---------|
+| `5/`（乾淨） | `clean` | 水體清澈透明 | — |
+| `3/`（混濁） | `turbid` | 水體呈現混濁黃褐色 | — |
+| `1/`（髒） | `dirty` | 水體呈現明顯污染、顏色深 | — |
+
+### 資料來源
+
+- 拍攝地點：瓦磘溝（新北市）
+- 拍攝者：瓦磘溝行動研究社學生
+- Google Drive 原始資料：[點此連結](https://drive.google.com/drive/folders/12OOjkS7GilRcvaVafh7NJKWk70mA1pDD)
+- **前處理說明**：所有照片已預先裁切，只保留水面部分（去除天空、岸邊、建築物等背景），可直接用於訓練。
+
+### 資料切分
+
+| 子集 | 用途 | 比例 |
+|------|------|------|
+| `train/` | 模型學習用 | 70% |
+| `val/` | 訓練過程即時評估 | 20% |
+| `test/` | 最終獨立測試 | 10% |
+
+> 完整照片存放於 Google Drive（見上方連結）。GitHub 只存放程式碼；照片因檔案較大不納入版本控制（已列入 `.gitignore`）。
+
+---
+
+## 為什麼用 YOLOv8 分類模型？
+
+本專案使用 **YOLOv8 影像分類模型（yolov8s-cls）**，而非物件偵測模型。原因如下：
+
+| 比較項目 | 物件偵測（YOLOv8-det） | 影像分類（YOLOv8-cls）✅ |
+|---------|----------------------|------------------------|
+| **標註方式** | 需要手動畫 bounding box | 只需用資料夾區分類別 |
+| **照片前處理** | 需要讓模型找出水面位置 | 照片已裁切好，不需要 |
+| **任務本質** | 找出「哪裡有水」 | 判斷「這張照片的水質」|
+| **結果呈現** | 框框 + 類別名稱 | 類別 + 機率（更直觀）|
+| **適合教學** | 需解釋 IoU、anchor 等概念 | 準確率、混淆矩陣容易理解 |
+
+簡單說：因為照片已經裁切好只剩水面，我們只需要「判斷整張照片屬於哪一類」，這正是**影像分類**的任務，不需要物件偵測。
+
+---
+
+## 模型架構與訓練方式
+
+### 模型
+
+- **架構**：YOLOv8s-cls（YOLOv8 Small 分類版本）
+- **預訓練**：ImageNet-1k（遷移學習，不需從零訓練）
+- **輸入尺寸**：224 × 224 像素
+
+### 訓練參數
+
+| 參數 | 值 | 說明 |
+|------|----|------|
+| `epochs` | 100 | 最多訓練 100 輪 |
+| `batch` | 32 | 每次更新使用 32 張圖 |
+| `imgsz` | 224 | 輸入圖片縮放到 224×224 |
+| `patience` | 20 | 20 輪沒進步就提早停止 |
+| `optimizer` | AdamW（預設）| 自動調整學習率 |
+
+---
+
+## 如何重現訓練（Google Colab）
+
+### 一鍵開啟
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/d225d225/Image-Cropping-for-Water-Quality-Classification/blob/main/water_quality_colab.ipynb)
+
+### 步驟
+
+1. 點擊上方「Open in Colab」徽章
+2. 上方選單 → **執行階段** → **變更執行階段類型** → 選 **T4 GPU**
+3. 依序點擊每個步驟的 ▶ 執行鈕
+4. 不需要寫任何程式，照順序執行完即可！
+
+> 💡 Colab 提供免費 GPU，訓練時間約 5–15 分鐘。
+
+---
+
+## 訓練結果
+
+> 訓練完成後，結果圖表將更新於此處。
+
+| 指標 | 數值 |
+|------|------|
+| 測試集準確率 | — |
+| clean F1 | — |
+| turbid F1 | — |
+| dirty F1 | — |
+
+---
+
+## 檔案說明
+
+```
+Image-Cropping-for-Water-Quality-Classification/
+│
+├── water_quality_colab.ipynb  # 主要 Colab 訓練 Notebook（Step 1–8）
+├── prepare_dataset.py         # 本機資料整理腳本
+├── analyze_results.py         # 本機結果分析腳本
+├── requirements.txt           # Python 套件清單
+├── PROMPT.md                  # 專案提示詞紀錄（教學用）
+├── README.md                  # 本文件
+└── .gitignore                 # 排除照片、模型等大型檔案
+```
+
+---
+
+## 可以怎麼改善？
+
+| 方向 | 說明 |
+|------|------|
+| 📸 增加資料量 | 每類至少 100 張，尤其是最少的類別 |
+| 🎨 資料增強 | 旋轉、翻轉、亮度調整，讓模型更穩健 |
+| 📷 統一拍攝條件 | 相同時間、光線、角度，減少背景干擾 |
+| 🔧 換更大模型 | `yolov8m-cls` 或 `yolov8l-cls` 準確率更高 |
+| 🏷️ 細化標籤 | 例如區分「輕微混濁」與「嚴重混濁」 |
+
+---
+
+## 技術環境
+
+- Python 3.10+
+- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics)
+- Google Colab（T4 GPU）
+- Google Drive（資料與模型儲存）
+
+---
+
+## 授權
+
+本專案程式碼採用 [MIT License](LICENSE)。照片版權屬於瓦磘溝行動研究社，非經授權不得商業使用。

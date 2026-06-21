@@ -1,0 +1,9 @@
+raw_data/
+dataset/
+runs/
+__pycache__/
+*.pyc
+.DS_Store
+*.pt
+*.onnx
+*.zip
